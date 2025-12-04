@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.local
+
+# Schema-KG specific
+schema-kg-snow/cache/
+*.pyc
+agent_packs/
+visualizations/*.html
+visualizations/*.json
+
+# Credentials (important!)
+*credential*.json
+!*credential*.json.example
+
+# Logs
+*.log
+logs/
+output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Large data files
+*.parquet
+*.csv.gz
+
+# OS
+.DS_Store
+Thumbs.db
+
+methods/spider-agent-snow/snowflake_credential.json

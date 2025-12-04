@@ -1,0 +1,17 @@
+# Core dependencies
+networkx>=3.0
+requests>=2.31.0
+
+# Schema linking and retrieval
+rank-bm25>=0.2.2
+
+# Optional: Visualization
+pyvis>=0.3.2
+
+# Optional: Snowflake connectivity (if using live database)
+# snowflake-connector-python>=3.0.0
+
+# Development dependencies (optional)
+# pytest>=7.4.0
+# black>=23.0.0
+# mypy>=1.5.0

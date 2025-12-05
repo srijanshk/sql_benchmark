@@ -173,14 +173,42 @@ def cmd_link(
 
     result = linker.link(question, top_k=top_k)
 
-    print(f"Question: {question}")
-    print("Candidate tables:")
-    for node_id, score in result.candidate_tables:
-        print(f"  {node_id} -> {score:.3f}")
+    print(f"\nQuestion: {question}")
+    print(f"\n=== SCHEMA LINKING RESULTS ===\n")
+    
+    # Display concepts
+    if result.concepts:
+        print(f"Validated Concepts: {', '.join(result.concepts)}")
+    
+    # Display constraints
+    if result.constraints:
+        print(f"\nExtracted Constraints:")
+        for constraint in result.constraints:
+            print(f"  - {constraint['type']}: {constraint['operator']} {constraint['value']} (hint: {constraint.get('column_hint', 'N/A')})")
+    
+    # Display candidate tables
+    print(f"\nCandidate Tables:")
+    for table_candidate in result.candidate_tables:
+        print(f"  {table_candidate.table} -> Score: {table_candidate.score:.3f}")
+        if table_candidate.why:
+            for reason in table_candidate.why:
+                print(f"    • {reason}")
 
-    print("Candidate columns:")
-    for node_id, score in result.candidate_columns:
-        print(f"  {node_id} -> {score:.3f}")
+    # Display candidate columns
+    print(f"\nCandidate Columns:")
+    for col_candidate in result.candidate_columns:
+        role_str = f" [{col_candidate.role}]" if col_candidate.role else ""
+        print(f"  {col_candidate.column}{role_str} -> Score: {col_candidate.score:.3f}")
+        if col_candidate.why:
+            for reason in col_candidate.why:
+                print(f"    • {reason}")
+    
+    # Display join paths
+    if result.join_paths:
+        print(f"\nDiscovered Join Paths:")
+        for join_path in result.join_paths:
+            tables_str = " → ".join(join_path.tables)
+            print(f"  {tables_str} (Score: {join_path.score:.2f})")
 
 
 def cmd_predict(
@@ -205,18 +233,21 @@ def cmd_predict(
     print(f"Linking question: '{question}'")
     result = linker.link(question, top_k=top_k)
 
-    print("\nTop Candidate Tables:")
-    for node_id, score in result.candidate_tables:
-        attrs = linker.graph.nodes[node_id]
-        name = attrs.get("name")
-        print(f"  - {name} (Score: {score:.4f})")
+    print("\n=== SCHEMA LINKING RESULTS ===\n")
+    
+    print("Top Candidate Tables:")
+    for table_candidate in result.candidate_tables:
+        print(f"  - {table_candidate.table} (Score: {table_candidate.score:.4f})")
         
     print("\nTop Candidate Columns:")
-    for node_id, score in result.candidate_columns:
-        attrs = linker.graph.nodes[node_id]
-        name = attrs.get("name")
-        table = attrs.get("table")
-        print(f"  - {table}.{name} (Score: {score:.4f})")
+    for col_candidate in result.candidate_columns:
+        role_str = f" [{col_candidate.role}]" if col_candidate.role else ""
+        print(f"  - {col_candidate.column}{role_str} (Score: {col_candidate.score:.4f})")
+    
+    if result.join_paths:
+        print("\nJoin Paths:")
+        for join_path in result.join_paths:
+            print(f"  - {' → '.join(join_path.tables)}")
 
 def main() -> None:
     args = parse_args()

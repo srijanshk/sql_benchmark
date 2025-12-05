@@ -220,3 +220,25 @@ def _extract_sample_values(sample_rows: List[Dict[str, Any]], column_name: str) 
             values.append(row[column_name])
     # Limit to a few examples to keep metadata compact
     return values[:5]
+
+
+def load_metadata(resource_root: Path) -> Dict[str, DatabaseMetadata]:
+    """
+    Load metadata for all databases in the resource directory.
+    
+    Args:
+        resource_root: Path to directory containing database folders
+        
+    Returns:
+        Dictionary mapping database name to DatabaseMetadata
+    """
+    databases = discover_databases(resource_root)
+    metadata = {}
+    
+    for db_name in databases:
+        try:
+            metadata[db_name] = load_database_metadata(resource_root, db_name)
+        except Exception as e:
+            print(f"Warning: Failed to load metadata for {db_name}: {e}")
+    
+    return metadata

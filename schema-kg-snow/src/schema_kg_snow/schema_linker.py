@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from typing import Dict, List, Tuple, Any
+from dataclasses import dataclass, field
+from typing import Dict, List, Tuple, Any, Optional
 
 import networkx as nx
 
@@ -13,11 +13,40 @@ from .metadata_loader import DatabaseMetadata
 
 
 @dataclass
+class TableCandidate:
+    """Represents a candidate table with score and explanation."""
+    table: str  # Full table ID: "DB.SCHEMA.TABLE"
+    score: float
+    why: List[str] = field(default_factory=list)  # Explanations for selection
+
+
+@dataclass
+class ColumnCandidate:
+    """Represents a candidate column with role and explanation."""
+    column: str  # Full column ID: "DB.SCHEMA.TABLE.COLUMN"
+    score: float
+    role: Optional[str] = None  # join_key, filter, measure, dimension
+    why: List[str] = field(default_factory=list)
+
+
+@dataclass
+class JoinPath:
+    """Represents a join path connecting tables."""
+    tables: List[str]  # List of table names
+    joins: List[Dict[str, str]] = field(default_factory=list)  # [{"left": "...", "right": "..."}]
+    score: float = 0.0
+
+
+@dataclass
 class LinkerResult:
+    """Complete schema linking result matching KG instruction spec."""
     question: str
-    candidate_tables: List[Tuple[str, float]]
-    candidate_columns: List[Tuple[str, float]]
-    score_history: List[Dict[str, Any]] = None  # List of {step: str, scores: Dict[str, float]}
+    concepts: List[str] = field(default_factory=list)
+    constraints: List[Dict[str, Any]] = field(default_factory=list)
+    candidate_tables: List[TableCandidate] = field(default_factory=list)
+    candidate_columns: List[ColumnCandidate] = field(default_factory=list)
+    join_paths: List[JoinPath] = field(default_factory=list)
+    score_history: Optional[List[Dict[str, Any]]] = None  # For debugging
 
 
 class SchemaLinker:
@@ -145,11 +174,46 @@ class SchemaLinker:
         sorted_tables = sorted(table_scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
         sorted_columns = sorted(column_scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
 
+        # Convert to new format
+        table_candidates = [
+            TableCandidate(
+                table=self._extract_table_name(node_id),
+                score=score,
+                why=["Lexical match"]
+            )
+            for node_id, score in sorted_tables
+        ]
+        
+        column_candidates = [
+            ColumnCandidate(
+                column=self._extract_column_name(node_id),
+                score=score,
+                role=None,  # Baseline doesn't classify roles
+                why=["Lexical match"]
+            )
+            for node_id, score in sorted_columns
+        ]
+
         return LinkerResult(
             question=question,
-            candidate_tables=sorted_tables,
-            candidate_columns=sorted_columns,
+            concepts=[],  # Baseline doesn't extract concepts
+            constraints=[],  # Baseline doesn't extract constraints
+            candidate_tables=table_candidates,
+            candidate_columns=column_candidates,
+            join_paths=[],  # Baseline doesn't discover joins
         )
+    
+    def _extract_table_name(self, node_id: str) -> str:
+        """Extract DB.SCHEMA.TABLE from node_id."""
+        if ":" in node_id:
+            return node_id.split(":", 1)[1]
+        return node_id
+    
+    def _extract_column_name(self, node_id: str) -> str:
+        """Extract DB.SCHEMA.TABLE.COLUMN from node_id."""
+        if ":" in node_id:
+            return node_id.split(":", 1)[1]
+        return node_id
 
     def _score_tables(self, question_tokens: List[str]) -> Dict[str, float]:
         scores: Dict[str, float] = {}

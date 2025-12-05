@@ -187,43 +187,7 @@ The schema linking pipeline follows these steps:
 ### Step 8: Output Structured Payload
 Return JSON with ranked tables, columns, join paths, and explanations.
 
-## Project Status
 
-### ✅ Implemented
-
-- [x] Schema knowledge graph construction for 166+ databases
-- [x] Lexical schema linking with BM25 and n-gram matching
-- [x] Semantic linking via Ollama embeddings
-- [x] Embedding cache system (pre-computed for all databases)
-- [x] CLI for graph operations and schema linking
-- [x] Evaluation framework with Recall@K metrics
-- [x] Schema pack export for downstream agents
-- [x] Web interface for exploration and debugging
-
-### 🚧 In Development
-
-- [ ] Advanced concept extraction from schema metadata
-- [ ] Join path optimization using Steiner trees
-- [ ] Column role classification improvements
-- [ ] Multi-database question handling
-- [ ] Performance optimization for real-time queries
-
-### 🔮 Future Work
-
-- [ ] Graph neural network approaches for learned embeddings
-- [ ] Integration testing with SQL generation agents
-- [ ] Cross-database schema linking
-- [ ] Real-time schema evolution tracking
-- [ ] Support for additional embedding models (OpenAI, Anthropic)
-- [ ] Interactive schema exploration UI
-
-## Documentation
-
-- [**Schema-KG-Snow Detailed Documentation**](./schema-kg-snow/README.md) - Full API and implementation details
-- [**KG Progress Tracker**](./KG_PROGRESS.md) - Development progress and research notes
-- [**Snowflake Setup Guide**](./assets/Snowflake_Guideline.md) - Snowflake connection instructions
-
-## Common Tasks
 
 ### Generate Schema Pack for Multiple Databases
 
@@ -253,35 +217,3 @@ python -m schema_kg_snow.cli build-graph \
 # Remove cached embeddings to force regeneration
 rm -rf schema-kg-snow/cache/*
 ```
-
-## Spider2-Snow Benchmark
-
-The Spider2-Snow benchmark provides 166+ real-world text-to-SQL tasks across diverse domains:
-- Enterprise analytics (GA360, Adobe Analytics)
-- Sports and entertainment (Baseball, F1, Soccer)
-- E-commerce and retail
-- Healthcare and genomics
-- Government and public data
-
-Benchmark data is included in `spider2-snow/` and should be treated as read-only.
-
-## Citation
-
-If you use this work in your research, please cite the Spider2 paper:
-
-```bibtex
-@article{spider2,
-  title={Spider 2.0: Evaluating Language Models on Real-World Enterprise Text-to-SQL Workflows},
-  author={Cao, Fengyi and others},
-  journal={arXiv preprint},
-  year={2024}
-}
-```
-
-## License
-
-This project builds upon the Spider2.0 benchmark. See individual component licenses for details.
-
----
-
-**Note**: This is a research implementation focused on knowledge graph-driven schema linking. The pipeline is designed to complement SQL generation agents by providing intelligent schema selection, reducing context size, and improving query accuracy.
